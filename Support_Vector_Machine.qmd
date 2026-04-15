@@ -1,0 +1,93 @@
+---
+title: "Support Vector Machine (SVM) from Scratch"
+format: 
+  quarto: true
+execute:
+  echo: true
+  warning: false
+  error: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Libraries to use: pandas, numpy, plotly
+```
+
+# 📐 Support Vector Machine (SVM): Finding the Optimal Hyperplane
+
+Support Vector Machines (SVM) are powerful supervised learning models primarily used for classification, but also for regression. The core idea is to find the optimal hyperplane that distinctly separates data points belonging to different classes in a high-dimensional space. The "support vectors" are the data points closest to this hyperplane, which are the most critical in defining the boundary.
+
+## 🏛️ General Architecture
+
+The architecture revolves around maximizing the margin between the closest data points of different classes. For non-linearly separable data, the "Kernel Trick" is employed, which implicitly maps the input data into a higher-dimensional feature space where a linear separation *is* possible, without explicitly calculating the high-dimensional coordinates.
+
+*Diagram Concept: Two classes of data points separated by a hyperplane, with the maximum possible margin defined by the support vectors.*
+
+**Process Flow:**
+1.  Initialize Hyperplane parameters ($\theta$).
+2.  Determine the optimal separating hyperplane that maximizes the margin.
+3.  If data is not linearly separable, apply a Kernel Function (e.g., RBF, polynomial) to transform the data.
+4.  Use optimization techniques (often Quadratic Programming) to find the optimal parameters.
+5.  Classify new points based on which side of the hyperplane they fall.
+
+## 🛠️ Step-by-Step Implementation (Python/NumPy)
+
+This implementation will focus on the linear SVM case first, and then discuss the kernel trick conceptually.
+
+```{r setup, include=FALSE}
+# Ensure necessary libraries are installed/available in the environment
+library(pandas)
+library(numpy)
+library(plotly)
+```
+
+### 1. Data Preparation
+We will use a synthetic, linearly separable binary classification dataset.
+
+```{python data-prep}
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+
+# Generate linearly separable synthetic data
+np.random.seed(30)
+X = np.random.randn(100, 2)
+# Simple separation based on the sum of features
+y = (X[:, 0] + X[:, 1] > 0).astype(int).reshape(-1, 1)
+
+# Convert to DataFrame for easier handling
+data = pd.DataFrame(X, columns=['Feature_1', 'Feature_2'])
+data['y'] = y.flatten()
+print(data.head())
+```
+
+### 2. Linear SVM Formulation
+For simplicity, we start with the linear formulation: $\min \frac{1}{2} ||w||^2$ subject to $y_i(w^T x_i + b) \ge 1$.
+
+```{python linear-svm-setup}
+# --- Placeholder for Linear SVM Optimization ---
+# This requires solving a constrained quadratic programming problem, 
+# which is complex to implement from scratch without specialized solvers.
+# We will outline the necessary structure here.
+```
+
+### 3. The Kernel Trick (Conceptual)
+To handle non-linear data, we apply a kernel function $K(x_i, x_j) = \phi(x_i)^T \phi(x_j)$. The most common is the Radial Basis Function (RBF) kernel: $K(x_i, x_j) = \exp(-\gamma ||x_i - x_j||^2)$.
+
+```{python kernel-trick}
+def rbf_kernel(x_i, x_j, gamma=1.0):
+    # Euclidean distance squared
+    sq_dist = np.sum((x_i - x_j)**2)
+    return np.exp(-gamma * sq_dist)
+```
+
+### 4. Classification
+A new point is classified based on the sign of the decision function: $\text{sign}(w^T x + b)$.
+
+```{python classification}
+# ... (Code to classify a new point based on the learned w and b) ...
+```
+
+## 📝 Summary
+
+SVM is highly effective for classification by finding the maximum margin hyperplane. While the linear case is mathematically tractable, the **Kernel Trick** is what grants SVM its power, allowing it to solve complex, non-linear problems by projecting them into higher dimensions where a simple linear boundary can be found.
