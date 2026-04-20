@@ -8,9 +8,12 @@ execute:
   error: false
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{python setup, include=FALSE}
 # Libraries to use: pandas, numpy, plotly
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 ```
 
 # 🔮 Logistic Regression: Modeling Probabilities
@@ -21,8 +24,6 @@ Logistic Regression is used for binary classification problems (predicting a pro
 
 The core is the Sigmoid function, which takes any real number input and transforms it into a probability. The model then uses the Binary Cross-Entropy (Log Loss) as its cost function, which is minimized using Gradient Descent.
 
-*Diagram Concept: A sigmoid curve mapping $-\infty$ to $\infty$ to the range $(0, 1)$.*
-
 **Process Flow:**
 1.  Initialize Parameters ($\theta$).
 2.  Calculate Linear Output: $z = \theta^T x$.
@@ -32,28 +33,15 @@ The core is the Sigmoid function, which takes any real number input and transfor
 
 ## 🛠️ Step-by-Step Implementation (Python/NumPy)
 
-This implementation focuses on building the classifier and training it using Gradient Descent.
-
-```{r setup, include=FALSE}
-# Ensure necessary libraries are installed/available in the environment
-library(pandas)
-library(numpy)
-library(plotly)
-```
-
 ### 1. Data Preparation
 We will use a synthetic binary classification dataset.
 
 ```{python data-prep}
-import numpy as np
-import pandas as pd
-import plotly.graph_objects as go
-
 # Generate synthetic binary classification data
 np.random.seed(20)
 X = np.random.rand(100, 1)
 # Simple probability based on X to create binary outcome
-probabilities = 1 / (1 + np.exp(-(2 * X.flatten() - 3)))
+probabilities = 1 / (1 + np.exp(-(5 * X.flatten() - 3)))
 y = (probabilities > 0.5).astype(int).reshape(-1, 1)
 
 # Convert to DataFrame for easier handling
@@ -86,45 +74,57 @@ def compute_log_loss(X, y, theta):
 ```
 
 ### 4. Training Loop (Gradient Descent Application)
-We apply GD to minimize the log loss.
+We apply GD to minimize the log loss. The gradient of log loss is $\frac{1}{m} X^T (\hat{y} - y)$.
 
 ```{python training-loop}
-# NOTE: This requires the gradient calculation specific to Log Loss, which is similar to MSE but uses the sigmoid output.
-# ... (Placeholder for gradient_descent function and hyperparameter setup) ...
+def gradient_descent_log_loss(X, y, theta_init, learning_rate, n_iterations):
+    theta = theta_init.copy()
+    cost_history = []
+    
+    for i in range(n_iterations):
+        z = X.dot(theta)
+        y_pred = sigmoid(z)
+        
+        # Compute Cost
+        cost = compute_log_loss(X, y, theta)
+        cost_history.append(cost)
+        
+        # Compute Gradient
+        gradient = (1 / len(y)) * X.T.dot(y_pred - y)
+        
+        # Update Parameters
+        theta = theta - learning_rate * gradient
+        
+    return theta, cost_history
 
 # --- Hyperparameters ---
-learning_rate = 0.01
+learning_rate = 0.1
 n_iterations = 1000
 
 # Initialize theta (weights: intercept, slope)
 theta_initial = np.random.randn(2, 1) 
 
-# Run GD (Assuming the correct GD implementation for Log Loss is available)
-# final_theta, history = gradient_descent_log_loss(X, y, theta_initial, learning_rate, n_iterations)
-# print("Final Parameters (Theta):\n", final_theta)
+# Run GD
+final_theta, history = gradient_descent_log_loss(X, y, theta_initial, learning_rate, n_iterations)
+print("Final Parameters (Theta):\n", final_theta)
 ```
 
 ### 5. Visualization of Convergence
 This plot shows how the cost decreases as the algorithm trains.
 
 ```{python visualization}
-import plotly.graph_objects as go
-
-# Plotting the cost convergence over epochs
-# Assuming history is available from the training process
-
 def plot_convergence(history, title="Cost Function Convergence"):
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=list(range(len(history))), y=history, mode='lines+markers', name='Cost'))
-    fig.update_layout(
-        title=title,
-        xaxis_title='Iteration',
-        yaxis_title='Cost J(θ)',
-        template='plotly_white'
-    )
-    fig.show()
+    plt.figure(figsize=(10, 5))
+    plt.plot(history)
+    plt.title(title)
+    plt.xlabel('Iteration')
+    plt.ylabel('Cost J(θ)')
+    plt.grid(True)
+    plt.show()
+
+plot_convergence(history)
 ```
 
 ## 📝 Summary
 
-Logistic Regression is vital for classification. It leverages the Sigmoid function to output probabilities, which are then optimized using the Log Loss cost function. This allows us to move from simply predicting a number to predicting the *likelihood* of an event.
+Logistic Regression is vital for classification. It leverages the Sigmoid function to output probabilities, which are then optimized using the Log Loss cost function.
